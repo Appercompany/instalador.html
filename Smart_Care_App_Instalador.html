@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Smart Care — App do Instalador</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0f19;--bg-card:#1a2332;--bg-card-alt:#1e293b;--bg-hover:#243044;--bg-input:#0f172a;--accent-blue:#3b82f6;--accent-cyan:#06b6d4;--accent-green:#10b981;--accent-emerald:#059669;--accent-red:#ef4444;--accent-amber:#f59e0b;--accent-purple:#8b5cf6;--accent-orange:#f97316;--text-primary:#f1f5f9;--text-secondary:#94a3b8;--text-muted:#64748b;--text-dim:#475569;--border:#1e293b;--radius:16px;--radius-sm:12px;--radius-xs:8px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh;max-width:480px;margin:0 auto;padding-bottom:40px}
+
+.status-bar{display:flex;justify-content:space-between;align-items:center;padding:12px 20px 8px;font-size:12px;color:var(--text-muted)}
+
+/* HEADER */
+.app-header{display:flex;align-items:center;justify-content:space-between;padding:8px 20px 16px;border-bottom:1px solid var(--border)}
+.app-header-left{display:flex;align-items:center;gap:10px}
+.app-logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--accent-emerald),var(--accent-cyan));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.app-logo-text{font-family:'Space Mono',monospace;font-size:12px;font-weight:700;color:var(--accent-green);letter-spacing:1.5px;text-transform:uppercase}
+.app-header-badge{font-size:10px;padding:4px 10px;border-radius:100px;font-weight:700;background:rgba(16,185,129,.15);color:var(--accent-green);border:1px solid rgba(16,185,129,.2)}
+
+/* SCREENS */
+.screen{display:none;padding:20px}
+.screen.active{display:block}
+
+/* SCAN SCREEN */
+.scan-area{text-align:center;padding:32px 20px}
+.scan-icon-big{font-size:80px;margin-bottom:16px;display:block}
+.scan-title{font-size:22px;font-weight:800;margin-bottom:8px}
+.scan-desc{font-size:14px;color:var(--text-secondary);line-height:1.6;margin-bottom:32px;max-width:320px;margin-left:auto;margin-right:auto}
+
+.scan-btn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:20px;background:linear-gradient(135deg,var(--accent-green),var(--accent-emerald));color:#fff;border:none;border-radius:var(--radius-sm);font-size:17px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .2s;margin-bottom:12px}
+.scan-btn:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(16,185,129,.3)}
+.scan-btn:active{transform:translateY(0)}
+
+.scan-manual{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;background:transparent;color:var(--text-muted);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .2s}
+.scan-manual:hover{border-color:var(--accent-blue);color:var(--accent-blue)}
+
+.scan-recent{margin-top:32px;text-align:left}
+.scan-recent-title{font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px;font-family:'Space Mono',monospace}
+
+.recent-item{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:8px;cursor:pointer;transition:all .2s}
+.recent-item:hover{border-color:var(--accent-green);background:var(--bg-hover)}
+.recent-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.recent-icon.green{background:rgba(16,185,129,.15)}
+.recent-icon.blue{background:rgba(59,130,246,.15)}
+.recent-info{flex:1}
+.recent-name{font-size:13px;font-weight:600}
+.recent-detail{font-size:11px;color:var(--text-muted)}
+.recent-time{font-size:10px;color:var(--text-dim);font-family:'Space Mono',monospace}
+
+/* READING QR ANIMATION */
+.reading-screen{text-align:center;padding:60px 20px}
+.reading-ring{width:120px;height:120px;border-radius:50%;border:3px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;position:relative;animation:scanPulse 1.5s ease infinite}
+.reading-ring::after{content:'';position:absolute;inset:8px;border-radius:50%;border:2px dashed var(--accent-green);animation:spinScan 2s linear infinite}
+@keyframes scanPulse{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.3)}50%{box-shadow:0 0 0 20px rgba(16,185,129,0)}}
+@keyframes spinScan{to{transform:rotate(360deg)}}
+.reading-ring-icon{font-size:48px;z-index:1}
+.reading-text{font-size:16px;font-weight:700;color:var(--accent-green);margin-bottom:4px}
+.reading-sub{font-size:13px;color:var(--text-muted)}
+
+/* EQUIPMENT DETECTED */
+.equip-detected{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px}
+.equip-detected-header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.equip-detected-badge{display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:100px;font-size:11px;font-weight:700;background:rgba(16,185,129,.15);color:var(--accent-green)}
+.equip-detected-badge .dot{width:8px;height:8px;border-radius:50%;background:var(--accent-green);animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+.equip-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.equip-detail-item{background:var(--bg-card-alt);border-radius:var(--radius-xs);padding:10px 12px}
+.equip-detail-label{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+.equip-detail-value{font-size:13px;font-weight:600}
+.equip-detail-value.mono{font-family:'Space Mono',monospace;font-size:11px}
+.equip-detail-item.full{grid-column:1/-1}
+
+/* FORM */
+.form-section{margin-bottom:20px}
+.form-section-title{font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:2px;margin-bottom:14px;font-family:'Space Mono',monospace;display:flex;align-items:center;gap:8px}
+.form-section-title .step-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.step-num.green{background:rgba(16,185,129,.2);color:var(--accent-green);border:1px solid var(--accent-green)}
+.step-num.blue{background:rgba(59,130,246,.2);color:var(--accent-blue);border:1px solid var(--accent-blue)}
+.step-num.amber{background:rgba(245,158,11,.2);color:var(--accent-amber);border:1px solid var(--accent-amber)}
+.step-num.purple{background:rgba(139,92,246,.2);color:var(--accent-purple);border:1px solid var(--accent-purple)}
+.step-num.cyan{background:rgba(6,182,212,.2);color:var(--accent-cyan);border:1px solid var(--accent-cyan)}
+
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:6px}
+.form-group label .required{color:var(--accent-red);margin-left:2px}
+
+.form-input,.form-select,.form-textarea{width:100%;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-xs);padding:12px 14px;color:var(--text-primary);font-size:13px;font-family:'Plus Jakarta Sans',sans-serif;transition:border .2s}
+.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--accent-green)}
+.form-textarea{min-height:70px;resize:vertical}
+.form-input::placeholder{color:var(--text-dim)}
+
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+.form-hint{font-size:11px;color:var(--text-dim);margin-top:4px}
+
+/* PREFILLED BANNER */
+.prefilled-banner{display:flex;align-items:center;gap:10px;padding:12px 14px;background:rgba(6,182,212,.08);border:1px solid rgba(6,182,212,.15);border-radius:var(--radius-xs);margin-bottom:16px;font-size:12px;color:var(--accent-cyan)}
+.prefilled-banner strong{color:var(--text-primary)}
+
+/* LOCATION DETECT */
+.location-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;background:rgba(59,130,246,.1);color:var(--accent-blue);border:1px solid rgba(59,130,246,.25);border-radius:var(--radius-xs);font-size:13px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .2s;margin-bottom:14px}
+.location-btn:hover{background:rgba(59,130,246,.15)}
+.location-btn.detected{background:rgba(16,185,129,.1);color:var(--accent-green);border-color:rgba(16,185,129,.25)}
+
+/* PHOTO AREA */
+.photo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.photo-slot{aspect-ratio:4/3;border:2px dashed var(--border);border-radius:var(--radius-xs);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;transition:all .2s;font-size:12px;color:var(--text-muted)}
+.photo-slot:hover{border-color:var(--accent-blue);color:var(--accent-blue)}
+.photo-slot .photo-icon{font-size:24px}
+.photo-slot.filled{border-style:solid;border-color:var(--accent-green);background:rgba(16,185,129,.05)}
+.photo-slot.filled .photo-icon{color:var(--accent-green)}
+
+/* WARRANTY OPTIONS */
+.warranty-options{display:flex;flex-direction:column;gap:8px}
+.warranty-option{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all .2s}
+.warranty-option:hover{border-color:var(--accent-green)}
+.warranty-option.selected{border-color:var(--accent-green);background:rgba(16,185,129,.06)}
+.warranty-radio{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+.warranty-option.selected .warranty-radio{border-color:var(--accent-green);background:var(--accent-green)}
+.warranty-option.selected .warranty-radio::after{content:'✓';color:#fff;font-size:12px;font-weight:700}
+.warranty-info{flex:1}
+.warranty-name{font-size:13px;font-weight:700}
+.warranty-desc{font-size:11px;color:var(--text-muted);margin-top:2px}
+.warranty-period{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;color:var(--accent-green)}
+
+/* SUMMARY */
+.summary-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px}
+.summary-title{font-size:15px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.summary-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.summary-row:last-child{border-bottom:none}
+.summary-row .label{color:var(--text-muted)}
+.summary-row .value{font-weight:600;text-align:right;max-width:55%}
+.summary-row .value.mono{font-family:'Space Mono',monospace;font-size:11px}
+.summary-row .value.green{color:var(--accent-green)}
+
+/* BUTTONS */
+.btn-primary{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:18px;background:var(--accent-green);color:#fff;border:none;border-radius:var(--radius-sm);font-size:16px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .2s;margin-bottom:10px}
+.btn-primary:hover{background:var(--accent-emerald);transform:translateY(-1px)}
+.btn-primary:active{transform:translateY(0)}
+.btn-secondary{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;background:transparent;color:var(--text-secondary);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .2s}
+.btn-secondary:hover{border-color:var(--accent-green);color:var(--accent-green)}
+
+.btn-danger{background:var(--accent-red)}
+.btn-danger:hover{background:#dc2626}
+
+/* SUCCESS SCREEN */
+.success-screen{text-align:center;padding:40px 20px}
+.success-icon{font-size:80px;margin-bottom:16px;display:block;animation:popIn .5s ease}
+@keyframes popIn{0%{transform:scale(0)}50%{transform:scale(1.2)}100%{transform:scale(1)}}
+.success-title{font-size:24px;font-weight:800;margin-bottom:8px;color:var(--accent-green)}
+.success-desc{font-size:14px;color:var(--text-secondary);line-height:1.6;margin-bottom:24px}
+
+.success-summary{background:var(--bg-card);border:1px solid rgba(16,185,129,.2);border-radius:var(--radius);padding:20px;text-align:left;margin-bottom:24px}
+.success-summary-title{font-size:12px;font-weight:700;color:var(--accent-green);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;font-family:'Space Mono',monospace}
+.success-row{display:flex;justify-content:space-between;padding:6px 0;font-size:12px}
+.success-row .label{color:var(--text-muted)}
+.success-row .value{font-weight:600}
+
+.success-actions{display:flex;flex-direction:column;gap:8px}
+.success-auto{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:20px}
+.success-auto-title{font-size:12px;font-weight:700;color:var(--accent-cyan);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.success-auto-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary);padding:4px 0}
+.success-auto-item .check{color:var(--accent-green)}
+
+/* STEPPER */
+.stepper{display:flex;align-items:center;justify-content:center;gap:0;padding:16px 20px;margin-bottom:8px}
+.stepper-step{display:flex;align-items:center;gap:0}
+.stepper-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;border:2px solid var(--border);color:var(--text-dim);transition:all .3s;flex-shrink:0}
+.stepper-dot.active{border-color:var(--accent-green);color:var(--accent-green);background:rgba(16,185,129,.15)}
+.stepper-dot.done{border-color:var(--accent-green);background:var(--accent-green);color:#fff}
+.stepper-line{width:32px;height:2px;background:var(--border);transition:background .3s}
+.stepper-line.done{background:var(--accent-green)}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.animate{animation:fadeIn .4s ease both}
+.d1{animation-delay:.05s}.d2{animation-delay:.1s}.d3{animation-delay:.15s}.d4{animation-delay:.2s}.d5{animation-delay:.25s}
+</style>
+</head>
+<body>
+
+<!-- STATUS BAR -->
+<div class="status-bar"><span>9:41</span><span>📶 🔋 87%</span></div>
+
+<!-- HEADER -->
+<div class="app-header">
+<div class="app-header-left">
+<div class="app-logo-icon">🏭</div>
+<span class="app-logo-text">Smart Care</span>
+</div>
+<span class="app-header-badge">👷 Instalador</span>
+</div>
+
+<!-- STEPPER -->
+<div class="stepper" id="stepper">
+<div class="stepper-step"><div class="stepper-dot active" id="step-dot-1">1</div></div>
+<div class="stepper-line" id="step-line-1"></div>
+<div class="stepper-step"><div class="stepper-dot" id="step-dot-2">2</div></div>
+<div class="stepper-line" id="step-line-2"></div>
+<div class="stepper-step"><div class="stepper-dot" id="step-dot-3">3</div></div>
+<div class="stepper-line" id="step-line-3"></div>
+<div class="stepper-step"><div class="stepper-dot" id="step-dot-4">4</div></div>
+<div class="stepper-line" id="step-line-4"></div>
+<div class="stepper-step"><div class="stepper-dot" id="step-dot-5">✓</div></div>
+</div>
+
+<!-- ===== SCREEN 1: SCAN ===== -->
+<div class="screen active" id="screen-1">
+<div class="scan-area animate">
+<span class="scan-icon-big">📷</span>
+<div class="scan-title">Escanear QR Code</div>
+<div class="scan-desc">Escaneie o QR Code que já vem colado no equipamento direto da fábrica para iniciar a ativação.</div>
+<button class="scan-btn" onclick="startScan()">📷 Escanear QR Code do Equipamento</button>
+<button class="scan-manual" onclick="startScan()">⌨️ Digitar código manualmente</button>
+</div>
+<div class="scan-recent animate d2" style="padding:0 20px">
+<div class="scan-recent-title">Últimas Instalações</div>
+<div class="recent-item">
+<div class="recent-icon green">✅</div>
+<div class="recent-info"><div class="recent-name">Cama Elétrica Total Fiber Prime</div><div class="recent-detail">Hospital Albert Sabin — Curitiba/PR</div></div>
+<div class="recent-time">Ontem</div>
+</div>
+<div class="recent-item">
+<div class="recent-icon green">✅</div>
+<div class="recent-info"><div class="recent-name">Mesa Cirúrgica Elétrica Radiotransp.</div><div class="recent-detail">Hospital Albert Sabin — Curitiba/PR</div></div>
+<div class="recent-time">Ontem</div>
+</div>
+<div class="recent-item">
+<div class="recent-icon blue">✅</div>
+<div class="recent-info"><div class="recent-name">Foco Cirúrgico LED 02 Cúpulas</div><div class="recent-detail">Hospital Regional do Vale — Londrina/PR</div></div>
+<div class="recent-time">12/02</div>
+</div>
+</div>
+</div>
+
+<!-- ===== SCREEN 2: READING ===== -->
+<div class="screen" id="screen-reading">
+<div class="reading-screen">
+<div class="reading-ring"><span class="reading-ring-icon">📡</span></div>
+<div class="reading-text">Lendo QR Code...</div>
+<div class="reading-sub">Identificando equipamento no sistema</div>
+</div>
+</div>
+
+<!-- ===== SCREEN 3: REGISTER ===== -->
+<div class="screen" id="screen-2">
+<div class="animate">
+
+<!-- EQUIPMENT DETECTED -->
+<div class="equip-detected animate d1">
+<div class="equip-detected-header">
+<span style="font-size:28px">💡</span>
+<div style="flex:1">
+<div style="font-size:16px;font-weight:800">Foco Cirúrgico LED 02 Cúpulas</div>
+<div style="font-size:12px;color:var(--text-muted);margin-top:2px">Equipamento identificado pela fábrica</div>
+</div>
+<div class="equip-detected-badge"><span class="dot"></span> Novo</div>
+</div>
+<div class="equip-detail-grid">
+<div class="equip-detail-item"><div class="equip-detail-label">Nº de Série</div><div class="equip-detail-value mono">FC-LED-2026-0198</div></div>
+<div class="equip-detail-item"><div class="equip-detail-label">Modelo</div><div class="equip-detail-value">STARLED 35+35</div></div>
+<div class="equip-detail-item"><div class="equip-detail-label">Lote Fabricação</div><div class="equip-detail-value mono">LT-2026-FEV-042</div></div>
+<div class="equip-detail-item"><div class="equip-detail-label">Data Fabricação</div><div class="equip-detail-value mono">03/02/2026</div></div>
+</div>
+</div>
+
+<div class="prefilled-banner animate d2">
+✅ <span>Dados do equipamento <strong>preenchidos automaticamente</strong> pela fábrica. Preencha abaixo os dados do cliente e local de instalação.</span>
+</div>
+
+<!-- STEP 1: CLIENTE -->
+<div class="form-section animate d2">
+<div class="form-section-title"><span class="step-num green">1</span> Dados do Cliente</div>
+<div class="form-group">
+<label>Hospital / Clínica <span class="required">*</span></label>
+<select class="form-select" id="hospital-select" onchange="checkExistingClient()">
+<option value="">Selecione ou cadastre novo...</option>
+<option value="existing">Hospital Regional do Vale — Londrina/PR</option>
+<option value="existing2">Hospital Albert Sabin — Curitiba/PR</option>
+<option value="existing3">Hospital São Lucas — São Paulo/SP</option>
+<option value="new">➕ Cadastrar novo cliente</option>
+</select>
+<div class="form-hint">Clientes já cadastrados aparecem automaticamente</div>
+</div>
+
+<!-- NEW CLIENT FIELDS (hidden by default) -->
+<div id="new-client-fields" style="display:none">
+<div class="form-group">
+<label>Razão Social <span class="required">*</span></label>
+<input class="form-input" type="text" placeholder="Ex: Hospital Santa Casa de Misericórdia">
+</div>
+<div class="form-group">
+<label>CNPJ <span class="required">*</span></label>
+<input class="form-input" type="text" placeholder="00.000.000/0000-00">
+</div>
+<div class="form-row">
+<div class="form-group">
+<label>Telefone</label>
+<input class="form-input" type="tel" placeholder="(00) 0000-0000">
+</div>
+<div class="form-group">
+<label>E-mail</label>
+<input class="form-input" type="email" placeholder="compras@hospital.com">
+</div>
+</div>
+</div>
+
+<div class="form-group">
+<label>Engenheiro Clínico / Responsável</label>
+<input class="form-input" type="text" placeholder="Nome do responsável técnico" id="eng-name">
+</div>
+<div class="form-row">
+<div class="form-group">
+<label>Telefone Responsável</label>
+<input class="form-input" type="tel" placeholder="(00) 00000-0000">
+</div>
+<div class="form-group">
+<label>E-mail Responsável</label>
+<input class="form-input" type="email" placeholder="engclinico@hosp.com">
+</div>
+</div>
+</div>
+
+<!-- STEP 2: LOCAL -->
+<div class="form-section animate d3">
+<div class="form-section-title"><span class="step-num blue">2</span> Local de Instalação</div>
+
+<button class="location-btn" id="location-btn" onclick="detectLocation()">📍 Detectar localização automaticamente (GPS)</button>
+
+<div id="location-fields">
+<div class="form-row">
+<div class="form-group">
+<label>CEP</label>
+<input class="form-input" type="text" placeholder="00000-000" id="cep-input" onblur="fakeCepLookup()">
+</div>
+<div class="form-group">
+<label>UF</label>
+<select class="form-select" id="uf-input">
+<option value="">UF</option>
+<option>AC</option><option>AL</option><option>AM</option><option>AP</option><option>BA</option><option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option><option>MG</option><option>MS</option><option>MT</option><option>PA</option><option>PB</option><option>PE</option><option>PI</option><option selected>PR</option><option>RJ</option><option>RN</option><option>RO</option><option>RR</option><option>RS</option><option>SC</option><option>SE</option><option>SP</option><option>TO</option>
+</select>
+</div>
+</div>
+<div class="form-group">
+<label>Cidade</label>
+<input class="form-input" type="text" placeholder="Cidade" id="city-input">
+</div>
+<div class="form-group">
+<label>Endereço</label>
+<input class="form-input" type="text" placeholder="Rua, número" id="addr-input">
+</div>
+</div>
+
+<div class="form-group">
+<label>Setor do Hospital <span class="required">*</span></label>
+<select class="form-select">
+<option value="">Selecione o setor...</option>
+<option>Centro Cirúrgico (CC)</option>
+<option>UTI</option>
+<option>UTI Neonatal</option>
+<option>Pronto-Socorro (PS)</option>
+<option>Enfermaria</option>
+<option>Quimioterapia</option>
+<option>Hemodiálise</option>
+<option>Ambulatório</option>
+<option>Outro</option>
+</select>
+</div>
+<div class="form-row">
+<div class="form-group">
+<label>Sala / Leito</label>
+<input class="form-input" type="text" placeholder="Ex: Sala 03, Leito 04">
+</div>
+<div class="form-group">
+<label>Andar</label>
+<input class="form-input" type="text" placeholder="Ex: 2º andar">
+</div>
+</div>
+</div>
+</div>
+<div style="padding:0 20px 20px">
+<button class="btn-primary" onclick="goToScreen(3)">Continuar → Fotos e Garantia</button>
+</div>
+</div>
+
+<!-- ===== SCREEN 4: PHOTOS + WARRANTY ===== -->
+<div class="screen" id="screen-3">
+<div class="animate">
+
+<div class="form-section animate d1">
+<div class="form-section-title"><span class="step-num amber">3</span> Fotos da Instalação</div>
+<div class="form-hint" style="margin-bottom:12px">Registre fotos do equipamento instalado e do QR Code aplicado</div>
+<div class="photo-grid">
+<div class="photo-slot" onclick="fakePhoto(this)"><span class="photo-icon">📷</span><span>Equipamento instalado</span></div>
+<div class="photo-slot" onclick="fakePhoto(this)"><span class="photo-icon">🏷️</span><span>QR Code colado</span></div>
+<div class="photo-slot" onclick="fakePhoto(this)"><span class="photo-icon">🏥</span><span>Ambiente / Sala</span></div>
+<div class="photo-slot" onclick="fakePhoto(this)"><span class="photo-icon">📝</span><span>Nº Série (etiqueta)</span></div>
+</div>
+</div>
+
+<div class="form-section animate d2">
+<div class="form-section-title"><span class="step-num purple">4</span> Garantia</div>
+
+<div class="warranty-options">
+<div class="warranty-option selected" onclick="selectWarranty(this)">
+<div class="warranty-radio"></div>
+<div class="warranty-info"><div class="warranty-name">Garantia Padrão</div><div class="warranty-desc">Garantia de fábrica incluída na compra</div></div>
+<div class="warranty-period">12 meses</div>
+</div>
+<div class="warranty-option" onclick="selectWarranty(this)">
+<div class="warranty-radio"></div>
+<div class="warranty-info"><div class="warranty-name">Garantia Estendida</div><div class="warranty-desc">Extensão adicional contratada</div></div>
+<div class="warranty-period">24 meses</div>
+</div>
+<div class="warranty-option" onclick="selectWarranty(this)">
+<div class="warranty-radio"></div>
+<div class="warranty-info"><div class="warranty-name">Garantia Premium</div><div class="warranty-desc">Cobertura total + manutenção inclusa</div></div>
+<div class="warranty-period">36 meses</div>
+</div>
+</div>
+</div>
+
+<div class="form-section animate d3">
+<div class="form-section-title"><span class="step-num cyan">5</span> Instalação</div>
+<div class="form-row">
+<div class="form-group">
+<label>Data da Instalação</label>
+<input class="form-input" type="date" value="2026-02-14">
+</div>
+<div class="form-group">
+<label>Técnico Instalador</label>
+<select class="form-select"><option>André Santos</option><option>Carlos Oliveira</option><option>Fernando Lima</option><option>Outro</option></select>
+</div>
+</div>
+<div class="form-group">
+<label>Observações da instalação</label>
+<textarea class="form-textarea" placeholder="Ex: Instalado no suporte de teto existente. Cliente orientado sobre operação básica."></textarea>
+</div>
+<div class="form-group">
+<label>Treinamento realizado?</label>
+<div style="display:flex;gap:8px">
+<button class="location-btn detected" style="flex:1;margin:0" onclick="this.classList.add('detected')">✅ Sim, equipe treinada</button>
+<button class="location-btn" style="flex:1;margin:0;color:var(--accent-amber);border-color:rgba(245,158,11,.25);background:rgba(245,158,11,.05)" onclick="this.classList.add('detected')">📅 Agendar depois</button>
+</div>
+</div>
+</div>
+</div>
+<div style="padding:0 20px 20px">
+<button class="btn-primary" onclick="goToScreen(4)">📋 Revisar e Ativar</button>
+<button class="btn-secondary" onclick="goToScreen(2)" style="margin-top:4px">← Voltar</button>
+</div>
+</div>
+
+<!-- ===== SCREEN 5: REVIEW ===== -->
+<div class="screen" id="screen-4">
+<div class="animate">
+<div style="text-align:center;margin-bottom:20px">
+<div style="font-size:20px;font-weight:800">📋 Revisão Final</div>
+<div style="font-size:13px;color:var(--text-muted)">Confira os dados antes de ativar</div>
+</div>
+
+<div class="summary-card animate d1">
+<div class="summary-title">💡 Equipamento</div>
+<div class="summary-row"><span class="label">Tipo</span><span class="value">Foco Cirúrgico LED 02 Cúpulas</span></div>
+<div class="summary-row"><span class="label">Modelo</span><span class="value mono">STARLED 35+35</span></div>
+<div class="summary-row"><span class="label">Nº Série</span><span class="value mono">FC-LED-2026-0198</span></div>
+<div class="summary-row"><span class="label">Lote</span><span class="value mono">LT-2026-FEV-042</span></div>
+</div>
+
+<div class="summary-card animate d2">
+<div class="summary-title">🏥 Cliente & Local</div>
+<div class="summary-row"><span class="label">Hospital</span><span class="value">Hospital Regional do Vale</span></div>
+<div class="summary-row"><span class="label">Cidade</span><span class="value">Londrina — PR</span></div>
+<div class="summary-row"><span class="label">Setor</span><span class="value">Centro Cirúrgico</span></div>
+<div class="summary-row"><span class="label">Sala</span><span class="value">Sala 05</span></div>
+<div class="summary-row"><span class="label">Eng. Clínico</span><span class="value">Dr. Ricardo Costa</span></div>
+</div>
+
+<div class="summary-card animate d3">
+<div class="summary-title">🛡️ Garantia & Instalação</div>
+<div class="summary-row"><span class="label">Garantia</span><span class="value green">Padrão — 12 meses</span></div>
+<div class="summary-row"><span class="label">Válida até</span><span class="value mono">14/02/2027</span></div>
+<div class="summary-row"><span class="label">Data Instalação</span><span class="value mono">14/02/2026</span></div>
+<div class="summary-row"><span class="label">Técnico</span><span class="value">André Santos</span></div>
+<div class="summary-row"><span class="label">Treinamento</span><span class="value green">✅ Realizado</span></div>
+</div>
+</div>
+<div style="padding:0 20px 20px">
+<button class="btn-primary" onclick="activateEquipment()" style="font-size:17px;padding:20px">🚀 Ativar Equipamento no Smart Care</button>
+<button class="btn-secondary" onclick="goToScreen(3)" style="margin-top:4px">← Voltar e corrigir</button>
+</div>
+</div>
+
+<!-- ===== SCREEN 6: SUCCESS ===== -->
+<div class="screen" id="screen-5">
+<div class="success-screen">
+<span class="success-icon">🎉</span>
+<div class="success-title">Equipamento Ativado!</div>
+<div class="success-desc">O Foco Cirúrgico LED foi registrado com sucesso no Smart Care. O hospital já pode escanear o QR Code.</div>
+
+<div class="success-summary animate d1">
+<div class="success-summary-title">✅ Resumo da Ativação</div>
+<div class="success-row"><span class="label">Equipamento</span><span class="value">Foco Cirúrgico LED 02 Cúpulas</span></div>
+<div class="success-row"><span class="label">Serial</span><span class="value" style="font-family:'Space Mono',monospace;font-size:11px">FC-LED-2026-0198</span></div>
+<div class="success-row"><span class="label">Hospital</span><span class="value">Hospital Regional do Vale</span></div>
+<div class="success-row"><span class="label">Setor</span><span class="value">CC — Sala 05</span></div>
+<div class="success-row"><span class="label">Garantia</span><span class="value" style="color:var(--accent-green)">12 meses (até 14/02/2027)</span></div>
+</div>
+
+<div class="success-auto animate d2">
+<div class="success-auto-title">🤖 Ações automáticas executadas:</div>
+<div class="success-auto-item"><span class="check">✅</span> QR Code ativado — hospital já pode escanear</div>
+<div class="success-auto-item"><span class="check">✅</span> E-mail de boas-vindas enviado ao Eng. Clínico</div>
+<div class="success-auto-item"><span class="check">✅</span> Agenda de manutenções preventivas criada</div>
+<div class="success-auto-item"><span class="check">✅</span> Alerta de garantia (90/60/30 dias) programado</div>
+<div class="success-auto-item"><span class="check">✅</span> Equipamento visível no Portal do Hospital</div>
+<div class="success-auto-item"><span class="check">✅</span> Equipamento visível no Painel do Fabricante</div>
+<div class="success-auto-item"><span class="check">✅</span> Checklist de turno habilitado para enfermagem</div>
+<div class="success-auto-item"><span class="check">✅</span> Vídeos de treinamento vinculados ao QR Code</div>
+</div>
+
+<div class="success-actions animate d3">
+<button class="btn-primary" onclick="resetApp()">📷 Instalar Próximo Equipamento</button>
+<button class="btn-secondary" onclick="resetApp()">🏠 Voltar ao Início</button>
+</div>
+</div>
+</div>
+
+<script>
+let currentScreen=1;
+
+function goToScreen(n){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+n).classList.add('active');
+  currentScreen=n;
+  updateStepper(n);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function updateStepper(n){
+  for(let i=1;i<=5;i++){
+    const dot=document.getElementById('step-dot-'+i);
+    const line=document.getElementById('step-line-'+i);
+    if(!dot)continue;
+    dot.classList.remove('active','done');
+    if(i<n)dot.classList.add('done');
+    else if(i===n)dot.classList.add('active');
+    if(line){line.classList.remove('done');if(i<n)line.classList.add('done');}
+  }
+}
+
+function startScan(){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-reading').classList.add('active');
+  setTimeout(()=>{goToScreen(2);},2000);
+}
+
+function checkExistingClient(){
+  const val=document.getElementById('hospital-select').value;
+  document.getElementById('new-client-fields').style.display=val==='new'?'block':'none';
+  if(val==='existing'){document.getElementById('eng-name').value='Dr. Ricardo Costa';}
+}
+
+function detectLocation(){
+  const btn=document.getElementById('location-btn');
+  btn.innerHTML='⏳ Detectando...';
+  setTimeout(()=>{
+    btn.innerHTML='✅ Localização detectada — Londrina, PR';
+    btn.classList.add('detected');
+    document.getElementById('city-input').value='Londrina';
+    document.getElementById('uf-input').value='PR';
+    document.getElementById('cep-input').value='86010-000';
+    document.getElementById('addr-input').value='Av. Madre Leonia Milito, 1500';
+  },1500);
+}
+
+function fakePhoto(el){
+  el.classList.add('filled');
+  el.querySelector('.photo-icon').textContent='✅';
+  el.querySelector('span:last-child').textContent='Foto registrada';
+}
+
+function selectWarranty(el){
+  document.querySelectorAll('.warranty-option').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function activateEquipment(){
+  goToScreen(5);
+}
+
+function resetApp(){
+  goToScreen(1);
+  updateStepper(1);
+}
+
+function fakeCepLookup(){
+  const cep=document.getElementById('cep-input').value;
+  if(cep.length>=8){
+    document.getElementById('city-input').value='Londrina';
+    document.getElementById('uf-input').value='PR';
+    document.getElementById('addr-input').value='Av. Madre Leonia Milito';
+  }
+}
+</script>
+</body>
+</html>
